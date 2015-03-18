@@ -56,10 +56,41 @@ class ChatController extends Controller {
 	 *
 	 * @return Response
 	 */
-	public function create()
-	{
-		//
-	}
+    public function create(Request $request)
+    {
+        $token  =   $request->token;
+        $threadid  =   $request->threadid;
+        $body  =   $request->body;
+
+        $v = Validator::make($request->all(), [
+            'token' => 'required',
+            'threadid' => 'required|numeric',
+            'body' => 'required',
+        ]);
+        if ($v->fails())
+        {
+            return response()->json($v->errors(), 400);
+        }
+
+        $tokenDecoded = DecodeTokenJWT($token);
+        if($tokenDecoded['code'] == 200){
+            /*
+             * Valid Token Add Item
+             */
+            $result = DB::table('Chat_Message')->insert([
+                'threadid' => $threadid,
+                'body' => $body,
+                'sending_id' => $tokenDecoded['data']['numberid'],
+            ]);
+            return response()->json(['Message have been created'], 201);
+        }else{
+            /*
+             * Invalid Token
+             */
+            return response()->json([$tokenDecoded['message']], $tokenDecoded['code']);
+        }
+
+    }
 
 	/**
 	 * Store a newly created resource in storage.

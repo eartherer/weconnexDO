@@ -77,7 +77,7 @@ Route::delete('/reply/delete/{id}','ReplyController@destroy'); // Pending
  */
 Route::get('/thread/{id}','ChatController@threadID')->where('id', '[0-9]+');
 Route::get('/chat/{threadid}','ChatController@getChat')->where('threadid', '[0-9]+');
-
+Route::post('/chat/create','ChatController@create');
 
 
 
