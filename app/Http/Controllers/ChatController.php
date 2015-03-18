@@ -4,16 +4,22 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
-
+use Validator;
 class ChatController extends Controller {
 
+    public function getChat($threadid = null){
+        $result = DB::table('Chat_Message')->where('threadid','=',$threadid)->get();
+        return $result;
+    }
 
     public function threadID($id = null){
+//        dd($id);
         $token = Input::get('token');
-        $v = Validator::make($request->all(), [
+        $v = Validator::make(['token' => $token,'id' => $id], [
             'token' => 'required',
-            '$id' => 'required|numeric',
+            'id' => 'required|numeric',
         ]);
         if ($v->fails())
         {
@@ -26,17 +32,14 @@ class ChatController extends Controller {
              * Get Caller userID
              */
             $callerID = $tokenDecoded['data']['numberid'];
-
+            $response =  $this->get_thread_id_by_pair_id($callerID,$id);
+            return $response;
         }else{
             /*
              * Invalid Token
              */
             return response()->json([$tokenDecoded['message']], $tokenDecoded['code']);
         }
-
-
-
-        dd($token);
     }
 	/**
 	 * Display a listing of the resource.
@@ -111,5 +114,39 @@ class ChatController extends Controller {
 	{
 		//
 	}
+    function get_thread_id_by_pair_id($user_id_1,$user_id_2){
+
+        do{
+            $result = DB::select('SELECT id AS threadID, userid AS USER_1, (SELECT DISTINCT userid FROM Thread_Participant WHERE userid =?) AS USER_2
+            FROM Thread_Participant WHERE userid =? AND id IN (SELECT id FROM Thread_Participant WHERE userid =?)',[
+                $user_id_2,$user_id_1,$user_id_2
+            ]);
+            if($result == null){
+                /*
+                 * Get max thread ID
+                 */
+                $max_thread_id = DB::table('Thread_Participant')->max('id');
+                 /*
+                  * Create Thread
+                  */
+                $result = DB::table('Thread_Participant')->insert([
+                    'id'        =>  $max_thread_id + 1,
+                    'userid'    =>  $user_id_1,
+                ]);
+                $result = DB::table('Thread_Participant')->insert([
+                    'id'        =>  $max_thread_id + 1,
+                    'userid'    =>  $user_id_2,
+                ]);
+                /*
+                 * Goto Query Again
+                 */
+            }else{
+                /*
+                 * return Thread Detail
+                 */
+                return $result;
+            }
+        }while(1);
+    }
 
 }
