@@ -11,10 +11,13 @@ class ProfileController extends Controller {
 
     public function showbyid($id){
         $Result     =   DB::table('we_profiles')
+            ->join('pic_profile','we_profiles.id','=','pic_profile.numberid')
             ->where('id','=',$id)->get();
         if($Result == null){
             abort(404);
         }
+//        dd($Result[0]->url);
+        $Result[0]->url = $_SERVER['SERVER_ADDR'].DIRECTORY_SEPARATOR.$Result[0]->url;
         return $Result;
     }
 	/**
