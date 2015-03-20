@@ -115,10 +115,67 @@ class AlertController extends Controller {
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function update($id)
-	{
-		//
-	}
+    public function update($id,Request $request)
+    {
+        $token  =   $request->token;
+        $title  =   $request->title;
+        $body  =   $request->body;
+        $latitude   =   $request->latitude;
+        $longitude  =   $request->longitude;
+
+        $v = Validator::make($request->all(), [
+            'token' => 'required',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'title' => 'required',
+            'body' => 'required',
+        ]);
+        if ($v->fails())
+        {
+            return response()->json($v->errors(), 400);
+        }
+        $tokenDecoded = DecodeTokenJWT($token);
+        if($tokenDecoded['code'] == 200){
+            /*
+             * Valid Token Find alerts
+             */
+            $result = DB::table('alerts')->where('id','=',$id)->get();
+            if($result!=null){
+                /*
+                * Check Permission
+                */
+                //$result = DB::table('news')->where('id','=',$id)->where('adder_id','=',$tokenDecoded['data']['numberid'])->get();
+                if($result[0]->adder_id == $tokenDecoded['data']['numberid']){
+                    /*
+                     * Permission Accept
+                     */
+                    $result = DB::table('alerts')->where('id','=',$id)->update([
+                        'title' => $title,
+                        'body' => $body,
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
+                    ]);
+                    return response()->json(['Alerts have been updated'], 200);
+                }else{
+                    /*
+                     * User not have permission
+                     */
+                    return response()->json(['Permission denied'], 403);
+                }
+            }else {
+                /*
+                 * Not found item
+                 */
+                return response()->json(['Alerts not found'], 404);
+            }
+        }else{
+            /*
+             * Invalid Token
+             */
+            return response()->json([$tokenDecoded['message']], $tokenDecoded['code']);
+        }
+
+    }
 
 	/**
 	 * Remove the specified resource from storage.

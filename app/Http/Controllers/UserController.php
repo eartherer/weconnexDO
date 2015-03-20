@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Validator;
 class UserController extends Controller {
 
     public function login(Request $request){
@@ -47,9 +47,32 @@ class UserController extends Controller {
 	 *
 	 * @return Response
 	 */
-	public function create()
+	public function create(Request $request)
 	{
-		//
+        $id          =   $request->id;
+        $username    =   $request->username;
+        $password    =   $request->password;
+        $email       =   $request->email;
+        $v = Validator::make($request->all(), [
+            'id' => 'required|numeric',
+            'username' => 'required|alpha_num',
+            'password' => 'required|alpha_num',
+            'email' => 'required|email',
+        ]);
+        if ($v->fails())
+        {
+            return response()->json($v->errors(), 400);
+        }
+        /*
+         * Store in database
+         */
+        $result = DB::table('we_users')->insert([
+            'id'            =>  $id,
+            'username'      =>  $username,
+            'password'      =>  $password,
+            'email'         =>  $email,
+        ]);
+        return response()->json(['User have been created'], 201);
 	}
 
 	/**

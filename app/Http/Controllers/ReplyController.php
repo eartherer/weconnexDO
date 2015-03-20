@@ -142,12 +142,61 @@ class ReplyController extends Controller {
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function update($id)
-	{
-		//
-	}
+    public function update($id,Request $request)
+    {
+        $token  =   $request->token;
+        $body  =  $request->body;
 
-	/**
+        $v = Validator::make($request->all(), [
+            'token' => 'required',
+            'body' => 'required',
+        ]);
+        if ($v->fails())
+        {
+            return response()->json($v->errors(), 400);
+        }
+        $tokenDecoded = DecodeTokenJWT($token);
+        if($tokenDecoded['code'] == 200){
+            /*
+             * Valid Token Find News
+             */
+            $result = DB::table('we_replies')->where('id','=',$id)->get();
+            if($result!=null){
+                /*
+                * Check Permission
+                */
+                //$result = DB::table('news')->where('id','=',$id)->where('adder_id','=',$tokenDecoded['data']['numberid'])->get();
+                if($result[0]->postid == $tokenDecoded['data']['numberid']){
+                    /*
+                     * Permission Accept
+                     */
+                    $result = DB::table('we_replies')->where('id','=',$id)->update([
+                        'body' => $body,
+                    ]);
+                    return response()->json(['Reply have been updated'], 200);
+                }else{
+                    /*
+                     * User not have permission
+                     */
+                    return response()->json(['Permission denied'], 403);
+                }
+            }else {
+                /*
+                 * Not found Topic
+                 */
+                return response()->json(['Reply not found'], 404);
+            }
+        }else{
+            /*
+             * Invalid Token
+             */
+            return response()->json([$tokenDecoded['message']], $tokenDecoded['code']);
+        }
+
+    }
+
+
+    /**
 	 * Remove the specified resource from storage.
 	 *
 	 * @param  int  $id

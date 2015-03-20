@@ -22,12 +22,13 @@ Route::get('/news/get', function(){
  * Authentication
  */
 
-Route::post('userlogin','UserController@login');//@param user,password @return JWT
-
+Route::post('/users/login','UserController@login');//@param user,password @return JWT
+Route::put('/users','UserController@create');
 /*
  * Profile route
  */
 Route::get('/profile/{id}','ProfileController@showbyid')->where('id', '[0-9]+');
+Route::post('/profile/','ProfileController@create');
 /*
  * Area Route
  */
@@ -53,7 +54,8 @@ Route::delete('/news/delete/{id}','NewsController@destroy');
 Route::get('/alerts/{id}','AlertController@showbyid')->where('id', '[0-9]+');
 Route::get('/alerts/show/','AlertController@show');
 Route::get('/alerts/show/{count}','AlertController@show')->where('count', '[0-9]+');
-Route::post('/alerts/create/','AlertController@create');
+Route::post('/alerts/','AlertController@create');
+Route::put('/alerts/{id}','AlertController@update')->where('id', '[0-9]+');
 Route::delete('/alerts/delete/{id}','AlertController@destroy');
 /*
  * Topic route
@@ -62,6 +64,7 @@ Route::get('/topics/show/{count}','TopicController@show')->where('count', '[0-9]
 Route::get('/topics/owner/{id}','TopicController@showbyownerid')->where('id', '[0-9]+');
 Route::get('/topics/{id}','TopicController@showbyid')->where('id', '[0-9]+');
 Route::post('/topics/create','TopicController@create');
+Route::put('/topics/{id}','TopicController@update')->where('id', '[0-9]+');
 Route::delete('/topics/delete/{id}','TopicController@destroy');
 
 /*
@@ -72,6 +75,7 @@ Route::get('/reply/create/{id}','ReplyController@showbyownerid')->where('id', '[
 Route::get('/reply/topicid/{id}','ReplyController@showbytopicid')->where('id', '[0-9]+');
 Route::get('/reply/{id}','ReplyController@showbyid')->where('id', '[0-9]+');
 Route::post('/reply/create','ReplyController@create');
+Route::put('/reply/{id}','ReplyController@update')->where('id', '[0-9]+');
 Route::delete('/reply/delete/{id}','ReplyController@destroy'); // Pending
 
 /*
