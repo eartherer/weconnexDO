@@ -90,7 +90,11 @@ class AlertController extends Controller {
 	 */
     public function show($count = 10)
     {
-        $result = DB::table('alerts')->take($count)->orderBy('added_date', 'DESC')->get();
+        $result = DB::table('alerts')
+            ->join('tmpProfile','alerts.adder_id','=','tmpProfile.numberid')->take($count)->orderBy('added_date', 'DESC')->get();
+        foreach($result as $item){
+            $item->url = $_SERVER['SERVER_ADDR'].DIRECTORY_SEPARATOR.$item->url;
+        }
         return $result;
     }
 

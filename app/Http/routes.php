@@ -34,6 +34,7 @@ Route::get('/profile/{id}','ProfileController@showbyid')->where('id', '[0-9]+');
 Route::get('/areas/location/{cla}/{clo}/{radius}','AreaController@showbyLocation')->where('id', '[0-9]+');
 Route::get('/areas/owner/{id}','AreaController@showbyownerid')->where('id', '[0-9]+');
 Route::get('/areas/{id}','AreaController@showbyid')->where('id', '[0-9]+');
+Route::delete('/areas/pic/{id}','AreaController@deleteAreaPicture')->where('id', '[0-9]+');
 
 /*
  * NEWS route
@@ -41,7 +42,8 @@ Route::get('/areas/{id}','AreaController@showbyid')->where('id', '[0-9]+');
 Route::get('/news/{id}','NewsController@showbyid')->where('id', '[0-9]+');
 Route::get('/news/show/','NewsController@show');
 Route::get('/news/show/{count}','NewsController@show')->where('count', '[0-9]+');
-Route::post('/news/create/','NewsController@create');
+Route::post('/news/','NewsController@create');
+Route::put('/news/{id}','NewsController@update')->where('id', '[0-9]+');
 Route::delete('/news/delete/{id}','NewsController@destroy');
 //Route::get('/news/show/{count?}', 'NewsController@show');
 
@@ -85,6 +87,7 @@ Route::post('/chat/create','ChatController@create');
 Route::get('/upload', function(){
     return view('upload');
 });
+Route::post('/upload','FileController@upload');
 Route::post('/profile/upload','FileController@profileupload');
 Route::post('/areas/upload','FileController@areaupload');
 

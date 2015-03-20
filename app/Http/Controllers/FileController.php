@@ -42,7 +42,7 @@ class FileController extends Controller {
                 if (Input::file('file')->isValid()) {
                     $destinationPath = 'uploads/area_pic'; // upload path
                     $extension = Input::file('file')->getClientOriginalExtension(); // getting image extension
-                    $fileName = md5(Input::file('file')->getClientOriginalName()).'_'.time()."_".$extension; // renameing image
+                    $fileName = md5(Input::file('file')->getClientOriginalName()).'_'.time()."_.".$extension; // renameing image
                     Input::file('file')->move($destinationPath, $fileName); // uploading file to given path
                     // sending back with message
                     $finalfilepath = $destinationPath . DIRECTORY_SEPARATOR . $fileName;
@@ -136,6 +136,42 @@ class FileController extends Controller {
         }
     }
 
+    public function upload() {
+        // getting all of the post data
+        $file = array('image' => Request::file('file'));
+        // setting up rules
+
+        $message = [
+            'image.required'=>'ไม่พบไฟล์รูปภาพ',
+            'image.max'=>'ขนาดภาพเกิน 700 kb',
+            'image.mimes'=>'อนุญาติให้ใช้นามสกุล .jpg .jpeg หรือ .png เท่านั้น',
+        ];
+        $validator = Validator::make($file,['image'=>'required|max:700|mimes:jpg,png,jpeg'],$message);
+
+        // doing the validation, passing post data, rules and the messages
+        if ($validator->fails()) {
+            // send back to the page with the input data and errors
+            return response()->json($validator->errors(), 404);
+//            return abort(404,$validator->errors->all());
+        }
+        else {
+            // checking file is valid.
+            if (Request::file('file')->isValid()) {
+                $destinationPath = 'uploads'; // upload path
+                $extension = Request::file('file')->getClientOriginalExtension(); // getting image extension
+                $fileName = rand(11111,99999).'.'.$extension; // renameing image
+                Request::file('file')->move($destinationPath, $fileName); // uploading file to given path
+                // sending back with message
+                Session::flash('success', 'Upload successfully');
+                //return Redirect::to('upload');
+            }
+            else {
+                // sending back with error message.
+                Session::flash('error', 'uploaded file is not valid');
+                //return Redirect::to('upload');
+            }
+        }
+    }
 	/**
 	 * Display a listing of the resource.
 	 *
