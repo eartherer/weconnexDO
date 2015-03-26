@@ -25,8 +25,9 @@ class UserController extends Controller {
                 'numberid' => $Result->id,
             ];
             $payload = app('tymon.jwt.payload.factory')->make($payloadarray);
-            $token = JWTAuth::encode($payload);
-            return $token;
+            $token = JWTAuth::encode($payload)->get();
+            $var['token']=$token;
+            return $var;
         }
 //        dd($Result);
 //        abort(401,'Invalid Username');

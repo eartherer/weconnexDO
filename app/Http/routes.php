@@ -18,12 +18,17 @@ Route::get('/news/get', function(){
     return redirect()->action('App\Http\Controllers\NewsController@show');
 //    return 'showNews : '.$count;
 });
+
+
+
+
+
 /*
  * Authentication
  */
 
 Route::post('/users/login','UserController@login');//@param user,password @return JWT
-Route::put('/users','UserController@create');
+Route::post('/users','UserController@create');
 /*
  * Profile route
  */
@@ -35,7 +40,12 @@ Route::post('/profile/','ProfileController@create');
 Route::get('/areas/location/{cla}/{clo}/{radius}','AreaController@showbyLocation')->where('id', '[0-9]+');
 Route::get('/areas/owner/{id}','AreaController@showbyownerid')->where('id', '[0-9]+');
 Route::get('/areas/{id}','AreaController@showbyid')->where('id', '[0-9]+');
-Route::delete('/areas/pic/{id}','AreaController@deleteAreaPicture')->where('id', '[0-9]+');
+Route::post('/areas','AreaController@create');
+Route::delete('/areas/pic/{id}','AreaController@deleteAreaPicture')->where('id', '[0-9]+'); //pending document
+
+
+Route::get('/areas/{id}/container','AreaController@getContainer')->where('id', '[0-9]+');
+Route::get('/areas/{id}/container/{conid}','AreaController@getDataInContainer')->where('id', '[0-9]+')->where('conid', '[0-9]+');
 
 /*
  * NEWS route
@@ -45,27 +55,29 @@ Route::get('/news/show/','NewsController@show');
 Route::get('/news/show/{count}','NewsController@show')->where('count', '[0-9]+');
 Route::post('/news/','NewsController@create');
 Route::put('/news/{id}','NewsController@update')->where('id', '[0-9]+');
-Route::delete('/news/delete/{id}','NewsController@destroy');
+Route::delete('/news/{id}','NewsController@destroy');
 //Route::get('/news/show/{count?}', 'NewsController@show');
 
 /*
  * Alert route
  */
+Route::get('/alerts/location/{cla}/{clo}/{radius}','AlertController@showbyLocation')->where('id', '[0-9]+');
+Route::get('/alerts/{group}','AlertController@showbygroup')->where(['group' => '[A-Za-z]+']);
 Route::get('/alerts/{id}','AlertController@showbyid')->where('id', '[0-9]+');
 Route::get('/alerts/show/','AlertController@show');
 Route::get('/alerts/show/{count}','AlertController@show')->where('count', '[0-9]+');
 Route::post('/alerts/','AlertController@create');
 Route::put('/alerts/{id}','AlertController@update')->where('id', '[0-9]+');
-Route::delete('/alerts/delete/{id}','AlertController@destroy');
+Route::delete('/alerts/{id}','AlertController@destroy');
 /*
  * Topic route
  */
 Route::get('/topics/show/{count}','TopicController@show')->where('count', '[0-9]+');
 Route::get('/topics/owner/{id}','TopicController@showbyownerid')->where('id', '[0-9]+');
 Route::get('/topics/{id}','TopicController@showbyid')->where('id', '[0-9]+');
-Route::post('/topics/create','TopicController@create');
+Route::post('/topics','TopicController@create');
 Route::put('/topics/{id}','TopicController@update')->where('id', '[0-9]+');
-Route::delete('/topics/delete/{id}','TopicController@destroy');
+Route::delete('/topics/{id}','TopicController@destroy');
 
 /*
  * Reply route
@@ -74,9 +86,9 @@ Route::delete('/topics/delete/{id}','TopicController@destroy');
 Route::get('/reply/create/{id}','ReplyController@showbyownerid')->where('id', '[0-9]+');
 Route::get('/reply/topicid/{id}','ReplyController@showbytopicid')->where('id', '[0-9]+');
 Route::get('/reply/{id}','ReplyController@showbyid')->where('id', '[0-9]+');
-Route::post('/reply/create','ReplyController@create');
+Route::post('/reply','ReplyController@create');
 Route::put('/reply/{id}','ReplyController@update')->where('id', '[0-9]+');
-Route::delete('/reply/delete/{id}','ReplyController@destroy'); // Pending
+Route::delete('/reply/{id}','ReplyController@destroy'); // Pending
 
 /*
  * Chat Route

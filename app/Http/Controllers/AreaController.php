@@ -8,6 +8,26 @@ use Illuminate\Support\Facades\DB;
 use Validator;
 class AreaController extends Controller {
 
+    public function getDataInContainer($id,$conid){
+        $result = DB::table('Bee_Data')->where('containerid','=',$conid)->get();
+        if($result == null){
+            return response()->json(['Data not found'], 404);
+        }else{
+            return $result;
+        }
+    }
+    public function getContainer($id){
+        $result = DB::table('we_area_DataContainer')->where('areaid','=',$id)->get();
+        if($result == null){
+            return response()->json(['Data Container not found'], 404);
+        }else{
+            return $result;
+        }
+
+        dd($result);
+        return 'Get Contain';
+    }
+
     public function deleteAreaPicture($id = null,Request $request){
         $token  =   $request->token;
         $v = Validator::make($request->all(), [
@@ -106,12 +126,83 @@ class AreaController extends Controller {
 	 *
 	 * @return Response
 	 */
-	public function create()
-	{
-		//
-	}
+    public function create(Request $request)
+    {
+        $token          =   $request->token;
+        $latitude       =   $request->latitude;
+        $longitude      =   $request->longitude;
+        $isOwner        =   $request->isOwner;
+        $size           =   $request->size;
+        $owner_id       =   $request->owner_id;
+        $area_type      =   $request->area_type;
+        $land_type      =   $request->land_type;
+        $house_no       =   $request->house_no;
+        $village_no     =   $request->village_no;
+        $alley          =   $request->alley;
+        $road           =   $request->road;
+        $sub_district   =   $request->sub_district;
+        $district       =   $request->district;
+        $province       =   $request->province;
+        $zip_code       =   $request->zip_code;
+        $group       =   $request->group;
 
-	/**
+
+        $v = Validator::make($request->all(), [
+            'token' => 'required',
+            'latitude'        => 'required',
+            'longitude'       => 'required',
+            'isOwner'         => 'required',
+            'size'            => 'required',
+            'owner_id'        => 'required',
+            'area_type'       => 'required',
+            'land_type'       => 'required',
+            'house_no' => 'required',
+            'village_no' => 'required',
+            'alley' => 'required',
+            'road' => 'required',
+            'sub_district' => 'required',
+            'district' => 'required',
+            'province' => 'required',
+            'zip_code' => 'required',
+            'group' => 'required',
+        ]);
+        if ($v->fails())
+        {
+            return response()->json($v->errors(), 400);
+        }
+
+//        dd($request->all());
+        $tokenDecoded = DecodeTokenJWT($token);
+        if($tokenDecoded['code'] == 200){
+            $result = DB::table('we_areas')->insert([
+                'latitude'       => $latitude,
+                'longitude'      => $longitude,
+                'isOwner'        => $isOwner,
+                'size'           => $size,
+                'owner_id'       => $owner_id,
+                'area_type'      => $area_type,
+                'land_type'      => $land_type,
+                'house_no' => $house_no,
+                'village_no' => $village_no,
+                'alley' => $alley,
+                'road' => $road,
+                'sub_district' => $sub_district,
+                'district' => $district,
+                'province' => $province,
+                'zip_code' => $zip_code,
+                'group'    => $group,
+            ]);
+            return response()->json(['Area have been created'], 201);
+        }else{
+            /*
+             * Invalid Token
+             */
+            return response()->json([$tokenDecoded['message']], $tokenDecoded['code']);
+        }
+    }
+
+
+    /**
 	 * Store a newly created resource in storage.
 	 *
 	 * @return Response

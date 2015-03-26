@@ -8,6 +8,32 @@ use Illuminate\Support\Facades\DB;
 use Validator;
 class AlertController extends Controller {
 
+    public function showbygroup($group = null){
+        $result = DB::table('alerts')
+            ->join('tmpProfile','alerts.adder_id','=','tmpProfile.numberid')
+            ->where('alerts.group','=',$group)->orderBy('added_date', 'DESC')->get();
+        if($result == null)
+            return response()->json(['Alert Not Found'], 404);
+        foreach($result as $item){
+            $item->url = $_SERVER['SERVER_ADDR'].DIRECTORY_SEPARATOR.$item->url;
+        }
+        return $result;
+    }
+
+    public function showbyLocation($cla, $clo, $radius){
+        $rad_unit = ($radius/110);
+        $la_min = $cla - $rad_unit;
+        $la_max = $cla + $rad_unit;
+        $lo_min = $clo - $rad_unit;
+        $lo_max = $clo + $rad_unit;
+        $Result     =   DB::table('alerts')
+            ->join('tmpProfile','alerts.adder_id','=','tmpProfile.numberid')
+            ->whereBetween('latitude',array($la_min,$la_max))
+            ->whereBetween('longitude',array($lo_min,$lo_max))->get();
+        if($Result == null)
+            return response()->json(['Alert Not Found'], 404);
+        return $Result;
+    }
 
     public function testlog(Request $request){
         dd($request);
@@ -226,7 +252,14 @@ class AlertController extends Controller {
 
     public function showbyid($id)
     {
-        $result = DB::table('alerts')->where('id','=',$id)->get();
+        $result = DB::table('alerts')
+        ->join('tmpProfile','alerts.adder_id','=','tmpProfile.numberid')
+        ->where('id','=',$id)->orderBy('added_date', 'DESC')->get();
+        if($result == null)
+            return response()->json(['Alert Not Found'], 404);
+        foreach($result as $item){
+            $item->url = $_SERVER['SERVER_ADDR'].DIRECTORY_SEPARATOR.$item->url;
+        }
         return $result;
     }
 }
