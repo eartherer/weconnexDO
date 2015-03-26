@@ -347,10 +347,47 @@ class AreaController extends Controller {
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function destroy($id)
-	{
-		//
-	}
+    public function destroy($id = 0,Request $request)
+    {
+        $token  =   $request->token;
+        $v = Validator::make($request->all(), [
+            'token' => 'required',
+        ]);
+        if ($v->fails())
+        {
+            return response()->json($v->errors(), 400);
+        }
+        $tokenDecoded = DecodeTokenJWT($token);
+        if($tokenDecoded['code'] == 200){
+            /*
+             * Valid Token Delete Item
+             */
+
+            /*
+             * Check Permission
+             */
+            $result = DB::table('we_areas')->where('id','=',$id)->where('adder_id','=',$tokenDecoded['data']['numberid'])->get();
+            if($result!=null){
+                /*
+                 * Delete Area
+                 */
+                $result = DB::table('we_areas')->where('id','=',$id)->delete();
+                return response()->json(['Area have been deleted'], 200);
+            }else{
+                /*
+                 * User not have permission or News not found
+                 */
+                return response()->json(['Area not found'], 404);
+            }
+        }else{
+            /*
+             * Invalid Token
+             */
+            return response()->json([$tokenDecoded['message']], $tokenDecoded['code']);
+        }
+
+    }
+
 
 
     public function getAreaPicListByAreaID($id){

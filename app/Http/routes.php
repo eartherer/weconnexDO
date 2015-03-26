@@ -41,6 +41,8 @@ Route::get('/areas/location/{cla}/{clo}/{radius}','AreaController@showbyLocation
 Route::get('/areas/owner/{id}','AreaController@showbyownerid')->where('id', '[0-9]+');
 Route::get('/areas/{id}','AreaController@showbyid')->where('id', '[0-9]+');
 Route::post('/areas','AreaController@create');
+Route::delete('/areas/{id}','AreaController@destroy');
+
 Route::put('/areas/{id}','AreaController@update')->where('id', '[0-9]+');
 
 Route::delete('/areas/pic/{id}','AreaController@deleteAreaPicture')->where('id', '[0-9]+'); //pending document
