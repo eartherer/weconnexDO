@@ -191,6 +191,7 @@ class AreaController extends Controller {
                 'province' => $province,
                 'zip_code' => $zip_code,
                 'group'    => $group,
+                'adder_id'    => $tokenDecoded['data']['numberid'],
             ]);
             return response()->json(['Area have been created'], 201);
         }else{
@@ -240,12 +241,107 @@ class AreaController extends Controller {
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function update($id)
-	{
-		//
-	}
+    public function update($id,Request $request)
+    {
+        $token          =   $request->token;
+        $latitude       =   $request->latitude;
+        $longitude      =   $request->longitude;
+        $isOwner        =   $request->isOwner;
+        $size           =   $request->size;
+        $owner_id       =   $request->owner_id;
+        $area_type      =   $request->area_type;
+        $land_type      =   $request->land_type;
+        $house_no       =   $request->house_no;
+        $village_no     =   $request->village_no;
+        $alley          =   $request->alley;
+        $road           =   $request->road;
+        $sub_district   =   $request->sub_district;
+        $district       =   $request->district;
+        $province       =   $request->province;
+        $zip_code       =   $request->zip_code;
+        $group       =   $request->group;
 
-	/**
+
+        $v = Validator::make($request->all(), [
+            'token' => 'required',
+            'latitude'        => 'required',
+            'longitude'       => 'required',
+            'isOwner'         => 'required',
+            'size'            => 'required',
+            'owner_id'        => 'required',
+            'area_type'       => 'required',
+            'land_type'       => 'required',
+            'house_no' => 'required',
+            'village_no' => 'required',
+            'alley' => 'required',
+            'road' => 'required',
+            'sub_district' => 'required',
+            'district' => 'required',
+            'province' => 'required',
+            'zip_code' => 'required',
+            'group' => 'required',
+        ]);
+        if ($v->fails())
+        {
+            return response()->json($v->errors(), 400);
+        }
+        $tokenDecoded = DecodeTokenJWT($token);
+        if($tokenDecoded['code'] == 200){
+            /*
+             * Valid Token Find alerts
+             */
+            $result = DB::table('we_areas')->where('id','=',$id)->get();
+            if($result!=null){
+                /*
+                * Check Permission
+                */
+                //$result = DB::table('news')->where('id','=',$id)->where('adder_id','=',$tokenDecoded['data']['numberid'])->get();
+                if($result[0]->adder_id == $tokenDecoded['data']['numberid']){
+                    /*
+                     * Permission Accept
+                     */
+                    $result = DB::table('we_areas')->where('id','=',$id)->update([
+                        'latitude'       => $latitude,
+                        'longitude'      => $longitude,
+                        'isOwner'        => $isOwner,
+                        'size'           => $size,
+                        'owner_id'       => $owner_id,
+                        'area_type'      => $area_type,
+                        'land_type'      => $land_type,
+                        'house_no' => $house_no,
+                        'village_no' => $village_no,
+                        'alley' => $alley,
+                        'road' => $road,
+                        'sub_district' => $sub_district,
+                        'district' => $district,
+                        'province' => $province,
+                        'zip_code' => $zip_code,
+                        'group'    => $group,
+                    ]);
+                    return response()->json(['Area have been updated'], 200);
+                }else{
+                    /*
+                     * User not have permission
+                     */
+                    return response()->json(['Permission denied'], 403);
+                }
+            }else {
+                /*
+                 * Not found item
+                 */
+                return response()->json(['Area not found'], 404);
+            }
+        }else{
+            /*
+             * Invalid Token
+             */
+            return response()->json([$tokenDecoded['message']], $tokenDecoded['code']);
+        }
+
+    }
+
+
+    /**
 	 * Remove the specified resource from storage.
 	 *
 	 * @param  int  $id
